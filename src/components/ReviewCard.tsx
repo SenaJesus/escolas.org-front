@@ -23,8 +23,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, no
                 borderRadius: '10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
-                boxShadow: 1,
+                gap: '12px'
             }}
         >
             <Box

@@ -1,4 +1,4 @@
-import { PaginatedEscolasListResponse, Estado, Cidade } from '../types/interfaces';
+import { PaginatedEscolasListResponse, Escola, Estado, Cidade } from '../types/interfaces';
 import api from './api';
 
 export const getEstados = async (): Promise<Estado[] | null> => {
@@ -43,6 +43,16 @@ export const getTodasEscolas = async (urlOrPage?: string | number): Promise<Pagi
         return response.data;
     } catch (error: any) {
         console.error('Erro ao buscar todas as escolas:', error);
+        return null;
+    }
+};
+
+export const getEscola = async (escolaId: number): Promise<Escola | null> => {
+    try {
+        const response = await api.get<Escola>(`escolas/${escolaId}`);
+        return response.data;
+    } catch (error: any) {
+        console.error('Erro ao buscar escolas com filtros:', error);
         return null;
     }
 };

@@ -17,7 +17,7 @@ const titleCase = (str: string): string => {
 const SchoolCard: React.FC<SchoolCardProps> = ({ escola }) => {
     const navigate = useNavigate();
 
-    const handleClick = () => navigate(`/escolas/${escola.id}`);
+    const handleClick = () => navigate(`/escola/${escola.id}`);
 
     const enderecoFormatado = titleCase(escola.bairro);
     const truncatedNome = escola.nome.length > 30
