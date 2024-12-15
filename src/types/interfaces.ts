@@ -15,10 +15,11 @@ export interface Cidade {
 };
 
 export interface EscolaList {
+    id: number;
     nome: string;
-    endereco: string;
+    bairro: string;
     cidade: Cidade;
-    average_avaliacoes: number;
+    average_avaliacoes: number | null;
 };
 
 export interface PaginatedEscolasListResponse {

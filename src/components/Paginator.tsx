@@ -10,19 +10,51 @@ interface PaginatorProps {
 
 const Paginator: React.FC<PaginatorProps> = ({ currentPage, totalPages, onPageChange }) => {
     const handleNextPage = () => {
-        if (currentPage + 1 === totalPages) return;
+        if (currentPage + 1 === totalPages || totalPages === 0) return;
         onPageChange(currentPage + 1);
     };
 
     const handlePreviousPage = () => {
-        if (currentPage - 1 < 0) return;
+        if (currentPage - 1 < 0 || totalPages === 0) return;
         onPageChange(currentPage - 1);
     };
 
     const handleChangePage = (circleIndex: number) => {
+        if (totalPages === 0) return;
         if (circleIndex === (currentPage % 4)) return;
-        if (circleIndex > (currentPage % 4)) return onPageChange(totalPages + circleIndex - (currentPage % 4));
-        return onPageChange(totalPages - (currentPage % 4) + circleIndex);
+        if (circleIndex > (currentPage % 4)) return onPageChange(currentPage + circleIndex - (currentPage % 4));
+        return onPageChange(currentPage - (currentPage % 4) + circleIndex);
+    };
+
+    const renderCircles = () => {
+        if (totalPages === 0) {
+            return (
+                <Box
+                    sx={{
+                        height: '20px',
+                        width: '20px',
+                        borderRadius: '50%',
+                        bgcolor: '#F4DBCF',
+                        cursor: 'default'
+                    }}
+                />
+            );
+        } else {
+            return [...Array(
+                (totalPages - (totalPages % 4)) <= currentPage && currentPage < totalPages ? totalPages % 4 : 4
+            )].map((_, index) => (
+                <Box
+                    sx={{
+                        height: '20px',
+                        width: '20px',
+                        borderRadius: '50%',
+                        bgcolor: currentPage % 4 === index ? '#D57D54' : '#F4DBCF',
+                        cursor: currentPage % 4 === index ? 'default' : 'pointer'
+                    }}
+                    onClick={() => handleChangePage(index)}
+                />
+            ));
+        }
     };
 
     return (
@@ -48,8 +80,8 @@ const Paginator: React.FC<PaginatorProps> = ({ currentPage, totalPages, onPageCh
             >
                 <KeyboardArrowLeftIcon
                     sx={{
-                        color: currentPage === 0 ? '#F4DBCF' : '#D57D54',
-                        cursor: currentPage === 0 ? 'default' : 'pointer'
+                        color: (currentPage === 0 || totalPages === 0) ? '#F4DBCF' : '#D57D54',
+                        cursor: (currentPage === 0 || totalPages === 0) ? 'default' : 'pointer'
                     }}
                     onClick={handlePreviousPage}
                 />
@@ -60,27 +92,12 @@ const Paginator: React.FC<PaginatorProps> = ({ currentPage, totalPages, onPageCh
                         padding: (totalPages - (totalPages % 4)) <= currentPage && currentPage < totalPages ? `0 ${12.5 * (4 - totalPages % 4)}px` : '0 0'
                     }}
                 >
-                    {
-                        [...Array(
-                            (totalPages - (totalPages % 4)) <= currentPage && currentPage < totalPages ? totalPages % 4 : 4
-                        )].map((_, index) => (
-                            <Box
-                                sx={{
-                                    height: '20px',
-                                    width: '20px',
-                                    borderRadius: '50%',
-                                    bgcolor: currentPage % 4 === index ? '#D57D54' : '#F4DBCF',
-                                    cursor: currentPage % 4 === index ? 'default' : 'pointer'
-                                }}
-                                onClick={() => handleChangePage(index)}
-                            />
-                        ))
-                    }
+                    {renderCircles()}
                 </Box>
                 <KeyboardArrowRightIcon
                     sx={{
-                        color: currentPage === totalPages - 1 ? '#F4DBCF' : '#D57D54',
-                        cursor: currentPage === totalPages - 1 ? 'default' : 'pointer'
+                        color: (currentPage === totalPages - 1 || totalPages === 0) ? '#F4DBCF' : '#D57D54',
+                        cursor: (currentPage === totalPages - 1 || totalPages === 0) ? 'default' : 'pointer'
                     }}
                     onClick={handleNextPage}
                 />
@@ -96,7 +113,7 @@ const Paginator: React.FC<PaginatorProps> = ({ currentPage, totalPages, onPageCh
                 }}
                 variant="h2"
             >
-                Página {currentPage + 1}/{totalPages}
+                Página {totalPages === 0 ? 0 : currentPage + 1}/{totalPages === 0 ? 0 : totalPages}
             </Typography>
         </Box>
     );

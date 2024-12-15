@@ -13,6 +13,15 @@ const HomePage = () => {
     const [totalApiPages, setTotalApiPages] = useState<number>(0);
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
+    const [filtered, setFiltered] = useState<boolean>(false);
+    const [filteredEscolas, setFilteredEscolas] = useState<EscolaList[]>([]);
+    const [filteredCount, setFilteredCount] = useState<number>(0);
+    const [filteredNextUrl, setFilteredNextUrl] = useState<string | null>(null);
+    const [isFiltering, setIsFiltering] = useState<boolean>(false);
+    const ESCOLAS_POR_PAGINA = 4;
+
+    const [searchKey, setSearchKey] = useState<number>(0);
+
     const fetchEscolas = async (page: number) => {
         setIsFetching(true);
         const response: PaginatedEscolasListResponse | null = await getTodasEscolas(page);
@@ -26,12 +35,47 @@ const HomePage = () => {
     };
 
     useEffect(() => {
-        fetchEscolas(apiPage);
-    }, [apiPage]);
+        if (!filtered) {
+            fetchEscolas(apiPage);
+        }
+    }, [apiPage, filtered]);
 
-    const fetchMore = () => {
+    const fetchMoreAll = () => {
         if (!isFetching && apiPage < totalApiPages) {
             setApiPage(prev => prev + 1);
+        }
+    };
+
+    const handleSearchComplete = (data: PaginatedEscolasListResponse | null, allResults: EscolaList[], searching: boolean) => {
+        setSearchKey(prev => prev + 1);
+        setIsFiltering(searching);
+        if (data) {
+            setFiltered(true);
+            setFilteredEscolas(allResults);
+            setFilteredCount(data.count);
+            setFilteredNextUrl(data.next);
+        } else {
+            setFiltered(true);
+            setFilteredEscolas([]);
+            setFilteredCount(0);
+            setFilteredNextUrl(null);
+        }
+    };
+
+    const fetchMoreFiltered = async () => {
+        if (!filteredNextUrl || isFiltering) return;
+        setIsFiltering(true);
+        try {
+            const res = await fetch(filteredNextUrl);
+            if (!res.ok) throw new Error('Falha ao carregar mais escolas filtradas');
+            const data: PaginatedEscolasListResponse = await res.json();
+            setFilteredEscolas(prev => [...prev, ...data.results]);
+            setFilteredCount(data.count);
+            setFilteredNextUrl(data.next);
+        } catch (error) {
+            console.error("Erro ao paginar filtradas:", error);
+        } finally {
+            setIsFiltering(false);
         }
     };
 
@@ -41,7 +85,8 @@ const HomePage = () => {
                 padding: '60px 120px 80px 120px',
                 display: 'flex',
                 height: '100%',
-                gap: '80px'
+                gap: '80px',
+                overflow: 'hidden'
             }}
         >
             <Box
@@ -88,15 +133,28 @@ const HomePage = () => {
                     flexGrow: 1
                 }}
             >
-                <SchoolSearch />
-                <ResultList
-                    escolas={escolas}
-                    loading={loading}
-                    totalEscolas={totalEscolas}
-                    escolasPorPagina={4}
-                    fetchMore={fetchMore}
-                    isFetching={isFetching}
-                />
+                <SchoolSearch onSearchComplete={handleSearchComplete} />
+                {filtered ? (
+                    <ResultList
+                        key={`filtered-${searchKey}`}
+                        escolas={filteredEscolas}
+                        loading={isFiltering}
+                        totalEscolas={filteredCount}
+                        escolasPorPagina={ESCOLAS_POR_PAGINA}
+                        fetchMore={fetchMoreFiltered}
+                        isFetching={isFiltering}
+                    />
+                ) : (
+                    <ResultList
+                        key={`all-${searchKey}`}
+                        escolas={escolas}
+                        loading={loading}
+                        totalEscolas={totalEscolas}
+                        escolasPorPagina={ESCOLAS_POR_PAGINA}
+                        fetchMore={fetchMoreAll}
+                        isFetching={isFetching}
+                    />
+                )}
             </Box>
         </Box>
     );

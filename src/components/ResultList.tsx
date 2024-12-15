@@ -3,6 +3,7 @@ import SchoolCard from "./SchoolCard";
 import Paginator from "./Paginator";
 import { EscolaList } from '../types/interfaces';
 import { useState, useEffect } from "react";
+import ReviewCard from "./ReviewCard";
 
 interface ResultListProps {
     escolas: EscolaList[];
@@ -19,13 +20,12 @@ const ResultList: React.FC<ResultListProps> = ({ escolas, loading, totalEscolas,
 
     const totalFrontendPages = Math.ceil(totalEscolas / escolasPorPagina);
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
-
     useEffect(() => {
         const startIndex = currentPage * escolasPorPagina;
         const endIndex = startIndex + escolasPorPagina;
         const escolasDaPagina = escolas.slice(startIndex, endIndex);
         setCurrentEscolas(escolasDaPagina);
+
         if (escolas.length - endIndex < escolasPorPagina && escolas.length < totalEscolas && !isFetching) fetchMore();
     }, [currentPage, escolas, totalEscolas, escolasPorPagina, fetchMore, isFetching]);
 
@@ -47,11 +47,30 @@ const ResultList: React.FC<ResultListProps> = ({ escolas, loading, totalEscolas,
     return (
         <Box
             sx={{
+                position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '25px'
             }}
         >
+            {isFetching && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(255,255,255,0.7)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10
+                    }}
+                >
+                    <CircularProgress sx={{ color: '#D57D54' }} />
+                </Box>
+            )}
             <Box>
                 <Typography
                     sx={{
@@ -89,7 +108,7 @@ const ResultList: React.FC<ResultListProps> = ({ escolas, loading, totalEscolas,
                     sx={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(2, 1fr)',
-                        paddingBottom: currentEscolas.length !== 0 && currentEscolas.length < escolasPorPagina  ? '116px' : '0',
+                        paddingBottom: currentEscolas.length !== 0 && currentEscolas.length <= escolasPorPagina / 2 ? '116px' : '0',
                         gap: 2
                     }}
                 >
@@ -108,7 +127,7 @@ const ResultList: React.FC<ResultListProps> = ({ escolas, loading, totalEscolas,
                     <Paginator
                         currentPage={currentPage}
                         totalPages={totalFrontendPages}
-                        onPageChange={handlePageChange}
+                        onPageChange={(page) => setCurrentPage(page)}
                     />
                 </Box>
             </Box>

@@ -4,17 +4,25 @@ import { useNavigate } from 'react-router-dom';
 
 interface SchoolCardProps {
     escola: EscolaList;
-}
+};
+
+const titleCase = (str: string): string => {
+    return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
 
 const SchoolCard: React.FC<SchoolCardProps> = ({ escola }) => {
-    const navigate = useNavigate(); // Hook para navegação
+    const navigate = useNavigate();
 
-    const handleClick = () => {
-        // Navegue para a página de detalhes da escola
-        // Supondo que você tenha uma rota como '/escolas/:nome'
-        // Ajuste conforme a necessidade
-        navigate(`/escolas/${encodeURIComponent(escola.nome)}`);
-    };
+    const handleClick = () => navigate(`/escolas/${escola.id}`);
+
+    const enderecoFormatado = titleCase(escola.bairro);
+    const truncatedNome = escola.nome.length > 30
+        ? escola.nome.substring(0, 30) + '...'
+        : escola.nome;
 
     return (
         <Box
@@ -46,7 +54,7 @@ const SchoolCard: React.FC<SchoolCardProps> = ({ escola }) => {
                     }}
                     variant="h1"
                 >
-                    {escola.nome}
+                    {truncatedNome}
                 </Typography>
                 <Typography
                     sx={{
@@ -57,7 +65,10 @@ const SchoolCard: React.FC<SchoolCardProps> = ({ escola }) => {
                     }}
                     variant="h1"
                 >
-                    {`${escola.endereco}, ${escola.cidade.nome}, ${escola.cidade.estado.sigla}`}
+                    {
+                        enderecoFormatado === '' ? `${escola.cidade.nome}, ${escola.cidade.estado.sigla}` :
+                        `${enderecoFormatado}, ${escola.cidade.nome}, ${escola.cidade.estado.sigla}`
+                    }
                 </Typography>
             </Box>
             <Typography
@@ -69,7 +80,7 @@ const SchoolCard: React.FC<SchoolCardProps> = ({ escola }) => {
                 }}
                 variant="h1"
             >
-                Avaliações dos usuários: <strong>{!escola.average_avaliacoes ? 'Sem dados' : escola.average_avaliacoes.toFixed(1)}</strong>
+                Avaliações dos usuários: <strong>{!escola.average_avaliacoes ? 'N/A' : escola.average_avaliacoes.toFixed(1)}</strong>
             </Typography>
         </Box>
     );

@@ -46,9 +46,24 @@ const NavBar = () =>
                 <Box
                     sx={{
                         height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
                         flexGrow: 1
                     }}
                 >
+                    <Typography
+                        sx={{
+                            fontFamily: `'Rubik', sans-serif`,
+                            fontWeight: '200',
+                            color: '#D57D54',
+                            fontSize: '16px',
+                            lineHeight: '0',
+                            userSelect: 'none'
+                        }}
+                        variant="h2"
+                    >
+                        Juntos, podemos construir um <strong>futuro</strong> melhor!
+                    </Typography>
                 </Box>
                 <Box
                     sx={{

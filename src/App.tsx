@@ -3,11 +3,11 @@ import { Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import NavBar from './components/NavBar';
 import { Box } from '@mui/material';
-import { DataProvider } from './contexts/DataContext';
+import { AppProvider } from './contexts/AppContext';
 
 const App: React.FC = () => {
   return (
-    <DataProvider>
+    <AppProvider>
       <main
         style={{
           display: 'flex',
@@ -27,7 +27,7 @@ const App: React.FC = () => {
 
         <Box sx={{ bgcolor: '#A2845E', height: '10px' }} />
       </main>
-    </DataProvider>
+    </AppProvider>
   );
 };
 

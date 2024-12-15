@@ -1,19 +1,45 @@
 import { Autocomplete, TextField } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CloseIcon from '@mui/icons-material/Close';
+import React from 'react';
 
-interface ChangedAutoCompleteProps {
+interface ChangedAutoCompleteProps<T> {
     width: string;
-};
+    options: T[];
+    value?: T | null;
+    onChange?: (event: React.SyntheticEvent, newValue: T | null) => void;
+    onInputChange?: (event: React.SyntheticEvent, newInputValue: string) => void;
+    getOptionLabel?: (option: T) => string;
+    freeSolo?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    placeholder?: string;
+}
 
-const ChangedAutoComplete: React.FC<ChangedAutoCompleteProps> = ({ width }) => {
+function ChangedAutoComplete<T>(props: ChangedAutoCompleteProps<T>) {
+    const { width, options, value, onChange, onInputChange, getOptionLabel, freeSolo, loading, disabled, placeholder } = props;
+
+    const localGetOptionLabel = (option: T | string): string => {
+        if (typeof option === 'string') {
+            return option;
+        }
+        return getOptionLabel ? getOptionLabel(option as T) : '';
+    };
+
     return (
         <Autocomplete
-            options={['Campinas', 'Jundiai', 'São Carlos']}
+            freeSolo={freeSolo}
+            options={options as (T | string)[]}
+            value={value as T | string | null}
+            onChange={onChange as any}
+            onInputChange={onInputChange as any}
+            getOptionLabel={localGetOptionLabel}
+            loading={loading}
+            disabled={disabled}
             renderInput={(params) => (
                 <TextField
                     {...params}
-                    placeholder="Pesquise"
+                    placeholder={placeholder || 'Pesquise'}
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             borderRadius: '50px',
@@ -115,19 +141,6 @@ const ChangedAutoComplete: React.FC<ChangedAutoCompleteProps> = ({ width }) => {
                     opacity: 1,
                 },
             }}
-            renderOption={(props, option, { selected }) => (
-                <li
-                    {...props}
-                    style={{
-                        backgroundColor: selected ? '#F4DBCF' : '#FFFFFF',
-                        color: '#373737',
-                        fontFamily: `'Rubik', sans-serif`,
-                        fontSize: '16px',
-                    }}
-                >
-                    {option}
-                </li>
-            )}
         />
     );
 };
