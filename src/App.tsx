@@ -1,26 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './components/HomePage';
+import NavBar from './components/NavBar';
+import { Box } from '@mui/material';
+import { DataProvider } from './contexts/DataContext';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <DataProvider>
+      <main
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh'
+        }}
+      >
+        <NavBar />
+        
+        <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/sobre" element={<HomePage />} />
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+        </Box>
+
+        <Box sx={{ bgcolor: '#A2845E', height: '10px' }} />
+      </main>
+    </DataProvider>
   );
-}
+};
 
 export default App;
