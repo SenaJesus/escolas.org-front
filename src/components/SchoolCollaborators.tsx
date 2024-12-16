@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { Funcionarios } from "../types/interfaces"; // Importe a interface corretamente
 
 type FuncionarioKey =
     | "Administrativos"
@@ -17,7 +18,7 @@ type FuncionarioKey =
     | "Gestão"
     | "Assistente Social";
 
-const FUNCIONARIOS_DICTIONARY: Record<FuncionarioKey, string> = {
+const FUNCIONARIOS_DICTIONARY: Record<FuncionarioKey, keyof Funcionarios> = {
     "Administrativos": "administrativos_quantidade",
     "Serviço Geral": "servico_geral_quantidade",
     "Bibliotecário": "bibliotecario_quantidade",
@@ -35,13 +36,17 @@ const FUNCIONARIOS_DICTIONARY: Record<FuncionarioKey, string> = {
     "Assistente Social": "assistente_social_quantidade"
 };
 
-const SchoolCollaborators = () => {
+interface SchoolCollaboratorsProps {
+    funcionarios: Funcionarios;
+}
+
+const SchoolCollaborators: React.FC<SchoolCollaboratorsProps> = ({ funcionarios }) => {
     const entries = Object.entries(FUNCIONARIOS_DICTIONARY);
-    const half = 8;
+    const half = Math.ceil(entries.length / 2);
     const firstColumnEntries = entries.slice(0, half);
     const secondColumnEntries = entries.slice(half);
 
-    const renderTable = (columnEntries: [string, string][]) => (
+    const renderTable = (columnEntries: [string, keyof Funcionarios][]) => (
         <Box 
             sx={{ 
                 display: 'table', 
@@ -49,58 +54,61 @@ const SchoolCollaborators = () => {
                 width: '100%'
             }}
         >
-            {columnEntries.map(([key, value], index) => (
-                <Box 
-                    key={value} 
-                    sx={{ 
-                        display: 'table-row', 
-                        borderBottom: index < columnEntries.length - 1 ? '1px solid #aaa' : 'none'
-                    }}
-                >
+            {columnEntries.map(([label, fieldKey], index) => {
+                const value = funcionarios[fieldKey];
+                return (
                     <Box 
+                        key={fieldKey} 
                         sx={{ 
-                            display: 'table-cell', 
-                            padding: '5px 0', 
-                            borderRight: '1px solid #aaa',
-                            verticalAlign: 'middle'
+                            display: 'table-row', 
+                            borderBottom: index < columnEntries.length - 1 ? '1px solid #aaa' : 'none'
                         }}
                     >
-                        <Typography
-                            sx={{
-                                fontFamily: `'Rubik', sans-serif`,
-                                fontWeight: '400',
-                                color: '#80685D',
-                                fontSize: '16px',
-                                userSelect: 'none'
+                        <Box 
+                            sx={{ 
+                                display: 'table-cell', 
+                                padding: '5px 0', 
+                                borderRight: '1px solid #aaa',
+                                verticalAlign: 'middle'
                             }}
-                            variant="body1"
                         >
-                            {key}
-                        </Typography>
-                    </Box>
-                    <Box 
-                        sx={{ 
-                            display: 'table-cell', 
-                            padding: '5px 5px', 
-                            verticalAlign: 'middle',
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Typography
-                            sx={{
-                                fontFamily: `'Rubik', sans-serif`,
-                                fontWeight: '400',
-                                color: '#80685D',
-                                fontSize: '16px',
-                                userSelect: 'none'
+                            <Typography
+                                sx={{
+                                    fontFamily: `'Rubik', sans-serif`,
+                                    fontWeight: '400',
+                                    color: '#80685D',
+                                    fontSize: '16px',
+                                    userSelect: 'none'
+                                }}
+                                variant="body1"
+                            >
+                                {label}
+                            </Typography>
+                        </Box>
+                        <Box 
+                            sx={{ 
+                                display: 'table-cell', 
+                                padding: '5px 5px', 
+                                verticalAlign: 'middle',
+                                textAlign: 'center'
                             }}
-                            variant="body1"
                         >
-                            {value}
-                        </Typography>
+                            <Typography
+                                sx={{
+                                    fontFamily: `'Rubik', sans-serif`,
+                                    fontWeight: '400',
+                                    color: '#80685D',
+                                    fontSize: '16px',
+                                    userSelect: 'none'
+                                }}
+                                variant="body1"
+                            >
+                                {value}
+                            </Typography>
+                        </Box>
                     </Box>
-                </Box>
-            ))}
+                );
+            })}
         </Box>
     );
 
@@ -113,7 +121,8 @@ const SchoolCollaborators = () => {
                 width: '500px',
                 padding: '25px',
                 borderRadius: '10px',
-                gap: '10px'
+                gap: '10px',
+                flexShrink: 0
             }}
         >
             <Typography

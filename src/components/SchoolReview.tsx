@@ -2,15 +2,33 @@ import React, { useRef, useState, useEffect } from "react";
 import { Box, Typography, Select, MenuItem } from "@mui/material";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ReviewCard from "./ReviewCard";
+import { Escola } from "../types/interfaces";
 
-const SchoolReview: React.FC = () => {
+interface SchoolReviewProps {
+    escola: Escola;
+}
+
+const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
     const [order, setOrder] = useState<'Decrescente' | 'Crescente'>('Decrescente');
+
+    const avaliacaoPadrao = {
+        nota: 0,
+        texto: "Hey! Esta escola ainda não foi avaliada, seja a primeira pessoa a avaliar e ajude outras pessoas!",
+        dataPublicacao: new Date().toLocaleDateString('pt-BR'),
+        nomeUsuario: "escolas.org"
+    };
+
     const [reviews, setReviews] = useState(() => {
-        return [...Array(15)].map((_) => ({
-            nota: Math.floor(Math.random() * 5) + 1,
-            texto: "Jesus Sena",
-            dataPublicacao: "15/12/2024",
-            nomeUsuario: "jesusfernandessenasena"
+        const avaliacoes = escola.avaliacoes;
+        if (!avaliacoes || avaliacoes.length === 0) {
+            return [avaliacaoPadrao];
+        }
+
+        return avaliacoes.map(av => ({
+            nota: av.nota,
+            texto: av.comentario ?? '',
+            dataPublicacao: new Date(av.data_criacao).toLocaleDateString('pt-BR'),
+            nomeUsuario: av.email.split('@')[0]
         }));
     });
 
@@ -52,6 +70,15 @@ const SchoolReview: React.FC = () => {
         });
         setReviews(sortedReviews);
     }, [order]);
+
+    const mediaAvaliacoes = reviews.length > 0
+        ? (reviews.reduce((acc, review) => acc + review.nota, 0) / reviews.length).toFixed(1)
+        : '0';
+
+    const truncateText = (text: string) => {
+        const MAX_CHARS = 260;
+        return text.length > MAX_CHARS ? text.slice(0, MAX_CHARS) + '...' : text;
+    };
 
     return (
         <Box
@@ -114,7 +141,7 @@ const SchoolReview: React.FC = () => {
                     }}
                     variant="h3"
                 >
-                    Avaliações dos usuários:  <strong style={{ fontWeight: 500, textDecoration: 'underline' }}>4,5</strong>
+                    Avaliações dos usuários:  <strong style={{ fontWeight: 500, textDecoration: 'underline' }}>{mediaAvaliacoes}</strong>
                 </Typography>
                 <Box
                     sx={{
@@ -287,7 +314,7 @@ const SchoolReview: React.FC = () => {
                         <ReviewCard 
                             key={index}
                             nota={review.nota} 
-                            texto={review.texto} 
+                            texto={truncateText(review.texto)} 
                             dataPublicacao={review.dataPublicacao} 
                             nomeUsuario={review.nomeUsuario}
                         />

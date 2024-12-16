@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { Educacao } from "../types/interfaces";
 
 type TeacherKey =
     | "Creche"
@@ -10,7 +11,7 @@ type TeacherKey =
     | "EJA Médio"
     | "Educação Especial";
 
-const TEACHER_DICTIONARY: Record<TeacherKey, string> = {
+const TEACHER_DICTIONARY: Record<TeacherKey, keyof Educacao> = {
     "Creche": "ed_inf_creche_docentes_quantidade",
     "Pré-escola": "ed_inf_pre_escola_docentes_quantidade",
     "Infantil": "ed_inf_docentes_quantidade",
@@ -20,8 +21,12 @@ const TEACHER_DICTIONARY: Record<TeacherKey, string> = {
     "EJA Médio": "eja_medio_docentes_quantidade",
     "Educação Especial": "ed_especial_docentes_quantidade"
 };
-    
-const SchoolTeachers = () => {
+
+interface SchoolTeachersProps {
+    educacao: Educacao;
+};
+
+const SchoolTeachers: React.FC<SchoolTeachersProps> = ({ educacao }) => {
     const entries = Object.entries(TEACHER_DICTIONARY);
 
     return (
@@ -33,7 +38,8 @@ const SchoolTeachers = () => {
                 width: '300px',
                 padding: '25px',
                 borderRadius: '10px',
-                gap: '10px'
+                gap: '10px',
+                flexShrink: 0
             }}
         >
             <Typography
@@ -56,58 +62,62 @@ const SchoolTeachers = () => {
                     width: '100%' 
                 }}
             >
-                {entries.map(([key, value], index) => (
-                    <Box 
-                        key={value} 
-                        sx={{ 
-                            display: 'table-row', 
-                            borderBottom: index < entries.length - 1 ? '1px solid #aaa' : 'none'
-                        }}
-                    >
+                {entries.map(([label, fieldKey], index) => {
+                    // Força a conversão para string
+                    const value = String(educacao[fieldKey]);
+                    return (
                         <Box 
+                            key={fieldKey} 
                             sx={{ 
-                                display: 'table-cell', 
-                                padding: '5px 0', 
-                                borderRight: '1px solid #aaa',
-                                verticalAlign: 'middle'
+                                display: 'table-row', 
+                                borderBottom: index < entries.length - 1 ? '1px solid #aaa' : 'none'
                             }}
                         >
-                            <Typography
-                                sx={{
-                                    fontFamily: `'Rubik', sans-serif`,
-                                    fontWeight: '400',
-                                    color: '#80685D',
-                                    fontSize: '16px',
-                                    userSelect: 'none'
+                            <Box 
+                                sx={{ 
+                                    display: 'table-cell', 
+                                    padding: '5px 0', 
+                                    borderRight: '1px solid #aaa',
+                                    verticalAlign: 'middle'
                                 }}
-                                variant="body1"
                             >
-                                {key}
-                            </Typography>
-                        </Box>
-                        <Box 
-                            sx={{ 
-                                display: 'table-cell', 
-                                padding: '5px 5px', 
-                                verticalAlign: 'middle',
-                                textAlign: 'center'
-                            }}
-                        >
-                            <Typography
-                                sx={{
-                                    fontFamily: `'Rubik', sans-serif`,
-                                    fontWeight: '400',
-                                    color: '#80685D',
-                                    fontSize: '16px',
-                                    userSelect: 'none'
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '400',
+                                        color: '#80685D',
+                                        fontSize: '16px',
+                                        userSelect: 'none'
+                                    }}
+                                    variant="body1"
+                                >
+                                    {label}
+                                </Typography>
+                            </Box>
+                            <Box 
+                                sx={{ 
+                                    display: 'table-cell', 
+                                    padding: '5px 5px', 
+                                    verticalAlign: 'middle',
+                                    textAlign: 'center'
                                 }}
-                                variant="body1"
                             >
-                                {value}
-                            </Typography>
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '400',
+                                        color: '#80685D',
+                                        fontSize: '16px',
+                                        userSelect: 'none'
+                                    }}
+                                    variant="body1"
+                                >
+                                    {value}
+                                </Typography>
+                            </Box>
                         </Box>
-                    </Box>
-                ))}
+                    );
+                })}
             </Box>
         </Box>
     );

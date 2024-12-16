@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { Educacao } from "../types/interfaces";
 
 type VacancieKey =
     | "Creche"
@@ -10,7 +11,7 @@ type VacancieKey =
     | "EJA Médio"
     | "Educação Especial";
 
-const VACANCIE_DICTIONARY: Record<VacancieKey, string> = {
+const VACANCIE_DICTIONARY: Record<VacancieKey, keyof Educacao> = {
     "Creche": "ed_inf_creche_matricula_quantidade",
     "Pré-escola": "ed_inf_pre_escola_matricula_quantidade",
     "Infantil": "ed_inf_matricula_quantidade",
@@ -20,8 +21,12 @@ const VACANCIE_DICTIONARY: Record<VacancieKey, string> = {
     "EJA Médio": "eja_medio_matricula_quantidade",
     "Educação Especial": "ed_especial_matricula_quantidade"
 };
-    
-const SchoolVacancies = () => {
+
+interface SchoolVacanciesProps {
+    educacao: Educacao;
+}
+
+const SchoolVacancies: React.FC<SchoolVacanciesProps> = ({ educacao }) => {
     const entries = Object.entries(VACANCIE_DICTIONARY);
 
     return (
@@ -33,7 +38,8 @@ const SchoolVacancies = () => {
                 width: '300px',
                 padding: '25px',
                 borderRadius: '10px',
-                gap: '10px'
+                gap: '10px',
+                flexShrink: 0
             }}
         >
             <Typography
@@ -56,58 +62,63 @@ const SchoolVacancies = () => {
                     width: '100%' 
                 }}
             >
-                {entries.map(([key, value], index) => (
-                    <Box 
-                        key={value} 
-                        sx={{ 
-                            display: 'table-row', 
-                            borderBottom: index < entries.length - 1 ? '1px solid #aaa' : 'none'
-                        }}
-                    >
+                {entries.map(([label, fieldKey], index) => {
+                    const rawValue = educacao[fieldKey];
+                    // converte para string
+                    const value = typeof rawValue === 'number' ? rawValue.toString() : '0';
+                    return (
                         <Box 
+                            key={fieldKey} 
                             sx={{ 
-                                display: 'table-cell', 
-                                padding: '5px 0', 
-                                borderRight: '1px solid #aaa',
-                                verticalAlign: 'middle'
+                                display: 'table-row', 
+                                borderBottom: index < entries.length - 1 ? '1px solid #aaa' : 'none'
                             }}
                         >
-                            <Typography
-                                sx={{
-                                    fontFamily: `'Rubik', sans-serif`,
-                                    fontWeight: '400',
-                                    color: '#80685D',
-                                    fontSize: '16px',
-                                    userSelect: 'none'
+                            <Box 
+                                sx={{ 
+                                    display: 'table-cell', 
+                                    padding: '5px 0', 
+                                    borderRight: '1px solid #aaa',
+                                    verticalAlign: 'middle'
                                 }}
-                                variant="body1"
                             >
-                                {key}
-                            </Typography>
-                        </Box>
-                        <Box 
-                            sx={{ 
-                                display: 'table-cell', 
-                                padding: '5px 5px', 
-                                verticalAlign: 'middle',
-                                textAlign: 'center'
-                            }}
-                        >
-                            <Typography
-                                sx={{
-                                    fontFamily: `'Rubik', sans-serif`,
-                                    fontWeight: '400',
-                                    color: '#80685D',
-                                    fontSize: '16px',
-                                    userSelect: 'none'
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '400',
+                                        color: '#80685D',
+                                        fontSize: '16px',
+                                        userSelect: 'none'
+                                    }}
+                                    variant="body1"
+                                >
+                                    {label}
+                                </Typography>
+                            </Box>
+                            <Box 
+                                sx={{ 
+                                    display: 'table-cell', 
+                                    padding: '5px 5px', 
+                                    verticalAlign: 'middle',
+                                    textAlign: 'center'
                                 }}
-                                variant="body1"
                             >
-                                {value}
-                            </Typography>
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '400',
+                                        color: '#80685D',
+                                        fontSize: '16px',
+                                        userSelect: 'none'
+                                    }}
+                                    variant="body1"
+                                >
+                                    {value}
+                                </Typography>
+                            </Box>
                         </Box>
-                    </Box>
-                ))}
+                    );
+                })}
             </Box>
         </Box>
     );

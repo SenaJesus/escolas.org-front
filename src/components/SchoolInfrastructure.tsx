@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { Infraestrutura } from "../types/interfaces";
 
 type InfraestructureKey =
     | "Água potável"
@@ -34,7 +35,7 @@ type InfraestructureKey =
     | "Terreirão Recreativo"
     | "Redes Sociais";
 
-const INFRAESTRUCTURE_DICTIONARY: Record<InfraestructureKey, string> = {
+const INFRAESTRUCTURE_DICTIONARY: Record<InfraestructureKey, keyof Infraestrutura> = {
     "Água potável": "agua_potavel",
     "Alimentação": "alimentacao",
     "Almoxarifado": "almoxarifado",
@@ -69,17 +70,20 @@ const INFRAESTRUCTURE_DICTIONARY: Record<InfraestructureKey, string> = {
     "Redes Sociais": "rede_social"
 };
 
-const SchoolInfraestructure = () => {
+interface SchoolInfraestructureProps {
+    infra: Infraestrutura;
+}
+
+const SchoolInfraestructure: React.FC<SchoolInfraestructureProps> = ({ infra }) => {
     const entries = Object.entries(INFRAESTRUCTURE_DICTIONARY);
 
-    // Dividimos em 4 colunas, cada uma com até 8 itens
     const columnSize = 8;
     const firstColumnEntries = entries.slice(0, columnSize);
     const secondColumnEntries = entries.slice(columnSize, columnSize * 2);
     const thirdColumnEntries = entries.slice(columnSize * 2, columnSize * 3);
     const fourthColumnEntries = entries.slice(columnSize * 3, columnSize * 4);
 
-    const renderTable = (columnEntries: [string, string][]) => (
+    const renderTable = (columnEntries: [string, keyof Infraestrutura][]) => (
         <Box 
             sx={{ 
                 display: 'table', 
@@ -87,58 +91,76 @@ const SchoolInfraestructure = () => {
                 width: '100%'
             }}
         >
-            {columnEntries.map(([key, value], index) => (
-                <Box 
-                    key={value} 
-                    sx={{ 
-                        display: 'table-row', 
-                        borderBottom: index < columnEntries.length - 1 ? '1px solid #aaa' : 'none'
-                    }}
-                >
+            {columnEntries.map(([label, fieldKey], index) => {
+                const hasFeature = infra[fieldKey] === true;
+                return (
                     <Box 
+                        key={fieldKey} 
                         sx={{ 
-                            display: 'table-cell', 
-                            padding: '5px 0', 
-                            borderRight: '1px solid #aaa',
-                            verticalAlign: 'middle'
+                            display: 'table-row', 
+                            borderBottom: index < columnEntries.length - 1 ? '1px solid #aaa' : 'none'
                         }}
                     >
-                        <Typography
-                            sx={{
-                                fontFamily: `'Rubik', sans-serif`,
-                                fontWeight: '400',
-                                color: '#80685D',
-                                fontSize: '16px',
-                                userSelect: 'none'
+                        <Box 
+                            sx={{ 
+                                display: 'table-cell', 
+                                padding: '5px 0', 
+                                borderRight: '1px solid #aaa',
+                                verticalAlign: 'middle'
                             }}
-                            variant="body1"
                         >
-                            {key}
-                        </Typography>
-                    </Box>
-                    <Box 
-                        sx={{ 
-                            display: 'table-cell', 
-                            padding: '5px 5px', 
-                            verticalAlign: 'middle',
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                width: 15,
-                                height: 15,
-                                display: 'inline-flex',
-                                backgroundImage: `url('/checkmark_color.png')`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                margin: 'auto'
+                            <Typography
+                                sx={{
+                                    fontFamily: `'Rubik', sans-serif`,
+                                    fontWeight: '400',
+                                    color: '#80685D',
+                                    fontSize: '16px',
+                                    userSelect: 'none'
+                                }}
+                                variant="body1"
+                            >
+                                {label}
+                            </Typography>
+                        </Box>
+                        <Box 
+                            sx={{ 
+                                display: 'table-cell', 
+                                padding: '5px 5px', 
+                                verticalAlign: 'middle',
+                                textAlign: 'center'
                             }}
-                        />
+                        >
+                            {hasFeature ? (
+                                <Box
+                                    sx={{
+                                        width: 15,
+                                        height: 15,
+                                        display: 'inline-flex',
+                                        backgroundImage: `url('/checkmark_color.png')`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                        margin: 'auto'
+                                    }}
+                                />
+                            ) : (
+                                <Box
+                                    sx={{
+                                        width: 15,
+                                        height: 15,
+                                        display: 'inline-flex',
+                                        backgroundImage: `url('/close_red.png')`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                        margin: 'auto'
+                                    }}
+                                />
+                            )}
+                        </Box>
                     </Box>
-                </Box>
-            ))}
+                );
+            })}
         </Box>
     );
 
@@ -151,7 +173,8 @@ const SchoolInfraestructure = () => {
                 width: '1000px',
                 padding: '25px',
                 borderRadius: '10px',
-                gap: '10px'
+                gap: '10px',
+                flexShrink: 0
             }}
         >
             <Typography

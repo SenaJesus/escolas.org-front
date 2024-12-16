@@ -7,8 +7,101 @@ import SchoolTeachers from "./SchoolTeachers";
 import SchoolVacancies from "./SchoolVacancies";
 import SchoolInfraestructure from "./SchoolInfrastructure";
 import SchoolEquipments from "./SchoolEquipments";
+import { Escola } from "../types/interfaces";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 
-const SchoolCensus = () => {
+interface SchoolCensusProps {
+    escola: Escola;
+};
+
+const SchoolCensus: React.FC<SchoolCensusProps> = ({ escola }) => {
+    const [order, setOrder] = useState<'Decrescente' | 'Crescente'>('Decrescente');
+
+    const latestCenso = useMemo(() => {
+        if (!escola.censos || escola.censos.length === 0) return null;
+        return escola.censos.reduce((prev, curr) => (curr.ano > prev.ano ? curr : prev), escola.censos[0]);
+    }, [escola]);
+
+    // Defina todos os Hooks antes de retornar condicionais
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const isDragging = useRef(false);
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
+
+    const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        if (scrollContainerRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            scrollContainerRef.current.scrollLeft += e.deltaY;
+        }
+    };
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (scrollContainerRef.current) {
+            isDragging.current = true;
+            startX.current = e.pageX - scrollContainerRef.current.offsetLeft;
+            scrollLeft.current = scrollContainerRef.current.scrollLeft;
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!isDragging.current || !scrollContainerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const walk = (x - startX.current);
+        scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+    };
+
+    const handleMouseUp = () => isDragging.current = false;
+    const handleMouseLeave = () => isDragging.current = false;
+
+    useEffect(() => {
+        // Caso precise rodar algo quando order mudar
+    }, [order]);
+
+    // Somente agora, após definir todos os Hooks, checamos se latestCenso é nulo
+    if (!latestCenso) {
+        return (
+            <Box
+                sx={{
+                    height: '550px',
+                    padding: '35px 120px 60px 120px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                }}
+            >
+                <Typography
+                    sx={{
+                        fontFamily: `'Rubik', sans-serif`,
+                        fontWeight: '600',
+                        color: '#80685D',
+                        fontSize: '20px',
+                        userSelect: 'none'
+                    }}
+                >
+                    Censo escolar
+                </Typography>
+                <Typography
+                    sx={{
+                        fontFamily: `'Rubik', sans-serif`,
+                        fontWeight: '200',
+                        color: '#373737',
+                        fontSize: '16px',
+                        userSelect: 'none'
+                    }}
+                >
+                    Não há dados de censo disponíveis para esta escola.
+                </Typography>
+            </Box>
+        );
+    }
+
+    const infra = latestCenso.infraestrutura;
+    const acessibilidade = infra.acessibilidade;
+    const funcionarios = infra.funcionarios;
+    const educacao = latestCenso.educacao;
+
     return (
         <Box
             sx={{
@@ -65,6 +158,8 @@ const SchoolCensus = () => {
                     }}
                 >
                     <Select
+                        value={order}
+                        onChange={(e) => setOrder(e.target.value as 'Decrescente' | 'Crescente')}
                         IconComponent={ArrowDropDownIcon}
                         sx={{
                             width: '181px',
@@ -210,18 +305,37 @@ const SchoolCensus = () => {
                     </Box>
                 </Box>
                 <Box
+                    ref={scrollContainerRef}
+                    onWheel={handleWheel}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseLeave}
                     sx={{
                         display: 'flex',
-                        gap: '12px'
+                        gap: '12px',
+                        marginTop: '10px',
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
+                        paddingBottom: '10px',
+                        cursor: isDragging.current ? 'grabbing' : 'grab',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        '&::-webkit-scrollbar': {
+                            display: 'none'
+                        },
+                        flexWrap: 'nowrap',
+                        userSelect: 'none',
+                        overscrollBehavior: 'none'
                     }}
                 >
-                    <SchoolAccessibility />
-                    <SchoolCollaborators />
-                    <SchoolTeachers />
-                    <SchoolInfraestructure />
-                    <SchoolInternet />
-                    <SchoolVacancies />
-                    <SchoolEquipments />
+                    <SchoolAccessibility acessibilidade={acessibilidade} />
+                    <SchoolInternet internet={infra.internet_aluno} />
+                    <SchoolCollaborators funcionarios={funcionarios} />
+                    <SchoolTeachers educacao={educacao} />
+                    <SchoolInfraestructure infra={infra} />
+                    <SchoolVacancies educacao={educacao} />
+                    <SchoolEquipments infra={infra} />
                 </Box>
             </Box>
         </Box>

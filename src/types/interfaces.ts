@@ -46,7 +46,7 @@ export interface Escola {
     telefone?: string | null;
     inicio_ano_letivo?: string | null;
     fim_ano_letivo?: string | null;
-    censo: CensoEscolar[];
+    censos: CensoEscolar[];
     avaliacoes: Avaliacao[];
 };
 
@@ -139,6 +139,7 @@ export interface Infraestrutura {
     dvd_quantidade: number;
     som_quantidade: number;
     tv_quantidade: number;
+    tablet_quantidade: number;
     lousa_digital_quantidade: number;
     projetor_quantidade: number; 
     computador_quantidade: number; 
@@ -150,7 +151,7 @@ export interface Infraestrutura {
 };
 
 export interface Cotas {
-    ppi: boolean; // 
+    ppi: boolean;
     renda: boolean; 
     escola_publica: boolean; 
     pcd: boolean; 

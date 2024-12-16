@@ -1,8 +1,60 @@
 import { Box, Typography } from "@mui/material";
 import SchoolItem from "./SchoolItem";
+import { Escola, Infraestrutura } from '../types/interfaces';
 
-const SchoolHeader = () => {
-    const itens = ['Laboratório de Química', 'Laboratório de Informática', 'Pátio Coberto', 'Arborização', 'Biblioteca', 'Internet', 'Refeitório', 'Quadra Esportiva', 'Parquinho']
+interface SchoolHeaderProps {
+    escola: Escola;
+};
+
+type InfraKey = keyof Infraestrutura;
+
+const INFRAESTRUCTURE_DICTIONARY: Record<string, InfraKey> = {
+    "Água potável": "agua_potavel",
+    "Alimentação": "alimentacao",
+    "Almoxarifado": "almoxarifado",
+    "Área verde": "area_verde",
+    "Auditório": "auditorio",
+    "Banheiro": "banheiro",
+    "Banheiro infantil": "banheiro_infantil",
+    "Banheiro Funcionários": "banheiro_funcionarios",
+    "Banheiro PNE": "banheiro_pne",
+    "Chuveiro": "banheiro_chuveiro",
+    "Biblioteca": "biblioteca",
+    "Cozinha": "cozinha",
+    "Dormitório aluno": "dormitorio_aluno",
+    "Dormitório professor": "dormitorio_professor",
+    "Lab. Ciências": "lab_ciencias",
+    "Lab. Informática": "lab_informatica",
+    "Pátio Coberto": "patio_coberto",
+    "Pátio Descoberto": "patio_descoberto",
+    "Parque infantil": "parque_infantil",
+    "Piscina": "piscina",
+    "Quadra coberta": "quadra_esportes_coberta",
+    "Quadra descoberta": "quadra_esportes_descoberta",
+    "Sala de Artes": "sala_artes",
+    "Sala de Música": "sala_musica",
+    "Sala de Dança": "sala_danca",
+    "Sala Recreativa": "sala_recreativa",
+    "Sala de Leitura": "sala_leitura",
+    "Sala de Professores": "sala_professor",
+    "Sala de Repouso": "sala_repouso_aluno",
+    "Sala Secretaria": "sala_secretaria",
+    "Terreirão Recreativo": "terreirao_recreativo",
+    "Redes Sociais": "rede_social"
+};
+
+const SchoolHeader = ({ escola }: SchoolHeaderProps) => {
+    const latestCenso = escola.censos.reduce((prev, curr) => (curr.ano > prev.ano ? curr : prev), escola.censos[0]);
+    const infra = latestCenso.infraestrutura;
+    const enderecoCompleto = `${escola.endereco}${escola.complemento ? `, ${escola.complemento}` : ''} - ${escola.cidade.nome} (${escola.cidade.estado.sigla})`;
+
+    const infraItems: string[] = [];
+
+    for (const [label, infraKey] of Object.entries(INFRAESTRUCTURE_DICTIONARY)) {
+        if (infra[infraKey] === true) {
+            infraItems.push(label);
+        }
+    };
 
     return (
         <Box
@@ -37,7 +89,7 @@ const SchoolHeader = () => {
                         }}
                         variant="h1"
                     >
-                        E. E. Manuel Albaladeijo Fernandes
+                        {escola.nome}
                     </Typography>
                     <Typography
                         sx={{
@@ -48,20 +100,22 @@ const SchoolHeader = () => {
                         }}
                         variant="h2"
                     >
-                        Avenida Emílio Bosco, nº 830 - Campinas (SP)
+                        {enderecoCompleto}
                     </Typography>
-                    <Typography
-                        sx={{
-                            fontFamily: `'Rubik', sans-serif`,
-                            fontWeight: '200',
-                            color: '#373737',
-                            fontSize: '16px',
-                            marginTop: '6px'
-                        }}
-                        variant="h3"
-                    >
-                        (19) 98440-6234
-                    </Typography>
+                    {escola.ddd && escola.telefone &&
+                        <Typography
+                            sx={{
+                                fontFamily: `'Rubik', sans-serif`,
+                                fontWeight: '200',
+                                color: '#373737',
+                                fontSize: '16px',
+                                marginTop: '6px'
+                            }}
+                            variant="h3"
+                        >
+                            ({escola.ddd}) {escola.telefone}
+                        </Typography>
+                    }
                 </Box>
                 <Box
                     sx={{
@@ -157,7 +211,7 @@ const SchoolHeader = () => {
                 }}
             >
                 {
-                    itens.map(item => <SchoolItem description={item} />)
+                    infraItems.map(item => <SchoolItem key={item} description={item} />)
                 }
             </Box>
         </Box>
