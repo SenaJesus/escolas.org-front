@@ -64,7 +64,7 @@ const SchoolVacancies: React.FC<SchoolVacanciesProps> = ({ educacao }) => {
             >
                 {entries.map(([label, fieldKey], index) => {
                     const rawValue = educacao[fieldKey];
-                    // converte para string
+                  
                     const value = typeof rawValue === 'number' ? rawValue.toString() : '0';
                     return (
                         <Box 

@@ -6,7 +6,7 @@ interface ReviewCardProps {
     texto: string;
     dataPublicacao: string;
     nomeUsuario: string;
-    onReadMore?: () => void; // Nova prop opcional
+    onReadMore?: () => void; 
 }
 
 const MAX_LENGTH = 130;
