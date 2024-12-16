@@ -53,7 +53,6 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
     const startX = useRef(0);
     const scrollLeft = useRef(0);
 
-    // Estados do fluxo de avaliação
     const [showModal, setShowModal] = useState(false);
     const [currentModal, setCurrentModal] = useState<
         'emailConfirmation' | 'insertCode' | 'doneConfirmation' | 'failCode' | 'insertReview' | 'doneReview' | ''
@@ -64,6 +63,10 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
     const [nota, setNota] = useState(0);
     const [comentario, setComentario] = useState('');
     const [failMessage, setFailMessage] = useState('');
+
+ 
+    const [showFullReviewModal, setShowFullReviewModal] = useState(false);
+    const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
     useEffect(() => {
         const sortedReviews = [...reviews].sort((a, b) => {
@@ -76,11 +79,6 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
         ? (reviews.reduce((acc, review) => acc + review.nota, 0) / reviews.length).toFixed(1)
         : '0';
 
-    const truncateText = (text: string) => {
-        const MAX_CHARS = 260;
-        return text.length > MAX_CHARS ? text.slice(0, MAX_CHARS) + '...' : text;
-    };
-
     const fecharModal = () => {
         setShowModal(false);
         setCurrentModal('');
@@ -91,36 +89,42 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
         setFailMessage('');
     };
 
-    // Iniciar fluxo ao clicar em "Fazer avaliação"
+    
+    const fecharFullReviewModal = () => {
+        setShowFullReviewModal(false);
+        setSelectedReview(null);
+    };
+
+    
     const iniciarFluxoAvaliacao = () => {
         const token = localStorage.getItem('authorization');
         const savedEmail = localStorage.getItem('email');
 
         if (token) {
-            // Se temos token mas não temos email salvo, precisamos pedir o email
+            
             if (!savedEmail) {
                 setShowModal(true);
                 setCurrentModal('emailConfirmation');
             } else {
-                // Temos token e email salvos
+               
                 setEmail(savedEmail);
                 setShowModal(true);
                 setCurrentModal('insertReview');
             }
         } else {
-            // Não temos token, pede email
+            
             setShowModal(true);
             setCurrentModal('emailConfirmation');
         }
     };
 
-    // Solicitar código
+   
     const solicitarCodigo = async () => {
         await solicitarAutorizacao(email);
         setCurrentModal('insertCode');
     };
 
-    // Confirmar código
+   
     const confirmarCodigoFunc = async () => {
         const res = await confirmarAutorizacao(email, codigo);
         if (res && res.token) {
@@ -130,18 +134,17 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
         }
     };
 
-    // Reenviar código
     const reenviarCodigo = async () => {
         await solicitarAutorizacao(email);
-        // Timer e overlay já estão no InsertCode
+        
     };
 
     const irParaAvaliacao = () => {
-        // Temos email e token salvos
+        
         setCurrentModal('insertReview');
     };
 
-    // Enviar avaliação
+   
     const enviarAvaliacao = async () => {
         const token = localStorage.getItem('authorization');
         const savedEmail = localStorage.getItem('email');
@@ -256,6 +259,139 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                     )}
                 </Box>
             )}
+
+            {showFullReviewModal && selectedReview && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10000
+                    }}
+                    onClick={fecharFullReviewModal}
+                >
+                    <Box
+                        sx={{
+                            margin: '10px',
+                            display: 'flex',
+                            width: '500px',
+                            height: 'auto',
+                            bgcolor: '#F3F3F3',
+                            borderRadius: '10px',
+                            padding: '15px',
+                            flexDirection: 'column',
+                            gap: '15px'
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                height: '23px',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <Box 
+                                sx={{
+                                    width: 23,
+                                    height: 23,
+                                    display: 'flex',
+                                    backgroundImage: `url('/close.png')`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'right center',
+                                    backgroundRepeat: 'no-repeat',
+                                    marginLeft: 'auto',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={fecharFullReviewModal}
+                            />
+                        </Box>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '15px'
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '4px'
+                                }}
+                            >
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '600',
+                                        color: '#80685D',
+                                        fontSize: '20px',
+                                        userSelect: 'none'
+                                    }}
+                                    variant="h1"
+                                >
+                                    Avaliação completa
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '200',
+                                        color: '#373737',
+                                        fontSize: '16px',
+                                        userSelect: 'none',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word'
+                                    }}
+                                    variant="h2"
+                                >
+                                    {selectedReview.texto}
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: '10px'
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    height: '35px',
+                                    width: '102px',
+                                    padding: '8px 20px',
+                                    borderRadius: '50px',
+                                    bgcolor: '#FF7A3A',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={fecharFullReviewModal}
+                            >
+                                <Typography
+                                    sx={{
+                                        fontFamily: `'Rubik', sans-serif`,
+                                        fontWeight: '400',
+                                        color: 'white',
+                                        fontSize: '16px',
+                                        userSelect: 'none'
+                                    }}
+                                    variant="body1"
+                                >
+                                    Fechar
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
+            )}
+
 
             <Box
                 sx={{
@@ -498,9 +634,13 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                         <ReviewCard 
                             key={index}
                             nota={review.nota} 
-                            texto={truncateText(review.texto)} 
+                            texto={review.texto} 
                             dataPublicacao={review.dataPublicacao} 
                             nomeUsuario={review.nomeUsuario}
+                            onReadMore={() => {
+                                setSelectedReview(review);
+                                setShowFullReviewModal(true);
+                            }}
                         />
                     ))}
                 </Box>

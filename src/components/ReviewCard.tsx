@@ -1,17 +1,19 @@
 import { Box, Typography } from "@mui/material";
+import React from "react";
 
 interface ReviewCardProps {
     nota: number;
     texto: string;
     dataPublicacao: string;
     nomeUsuario: string;
-};
+    onReadMore?: () => void; // Nova prop opcional
+}
 
 const MAX_LENGTH = 130;
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, nomeUsuario }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, nomeUsuario, onReadMore }) => {
     const displayedText = texto.length > MAX_LENGTH ? `${texto.substring(0, MAX_LENGTH)}...` : texto;
-    
+
     return (
         <Box
             sx={{
@@ -96,13 +98,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, no
             >
                 <Box 
                     sx={{
-                      width: 17,
-                      height: 14,
-                      display: 'flex',
-                      backgroundImage: `url('/quote_simbol.png')`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
+                    width: 17,
+                    height: 14,
+                    display: 'flex',
+                    backgroundImage: `url('/quote_simbol.png')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
                     }}
                 />
                 <Typography
@@ -133,6 +135,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, no
                             cursor: 'pointer'
                         }}
                         variant="body2"
+                        onClick={onReadMore}
                     >
                         Ler tudo
                     </Typography>

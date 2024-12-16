@@ -63,7 +63,7 @@ const SchoolTeachers: React.FC<SchoolTeachersProps> = ({ educacao }) => {
                 }}
             >
                 {entries.map(([label, fieldKey], index) => {
-                    // Força a conversão para string
+                
                     const value = String(educacao[fieldKey]);
                     return (
                         <Box 
