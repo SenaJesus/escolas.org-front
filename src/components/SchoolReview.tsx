@@ -6,7 +6,7 @@ import { Escola } from "../types/interfaces";
 
 interface SchoolReviewProps {
     escola: Escola;
-}
+};
 
 const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
     const [order, setOrder] = useState<'Decrescente' | 'Crescente'>('Decrescente');

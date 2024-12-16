@@ -7,7 +7,7 @@ import SchoolTeachers from "./SchoolTeachers";
 import SchoolVacancies from "./SchoolVacancies";
 import SchoolInfraestructure from "./SchoolInfrastructure";
 import SchoolEquipments from "./SchoolEquipments";
-import { Escola } from "../types/interfaces";
+import { Escola, CensoEscolar } from "../types/interfaces";
 import React, { useState, useMemo, useRef, useEffect } from "react";
 
 interface SchoolCensusProps {
@@ -15,14 +15,21 @@ interface SchoolCensusProps {
 };
 
 const SchoolCensus: React.FC<SchoolCensusProps> = ({ escola }) => {
-    const [order, setOrder] = useState<'Decrescente' | 'Crescente'>('Decrescente');
+
+
+    const censos = escola.censos || [];
 
     const latestCenso = useMemo(() => {
-        if (!escola.censos || escola.censos.length === 0) return null;
-        return escola.censos.reduce((prev, curr) => (curr.ano > prev.ano ? curr : prev), escola.censos[0]);
-    }, [escola]);
+        if (censos.length === 0) return null;
+        return censos.reduce((prev, curr) => (curr.ano > prev.ano ? curr : prev), censos[0]);
+    }, [censos]);
 
-    // Defina todos os Hooks antes de retornar condicionais
+    const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (latestCenso && selectedYear === null) setSelectedYear(latestCenso.ano);
+    }, [latestCenso, selectedYear]);
+
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
@@ -55,11 +62,6 @@ const SchoolCensus: React.FC<SchoolCensusProps> = ({ escola }) => {
     const handleMouseUp = () => isDragging.current = false;
     const handleMouseLeave = () => isDragging.current = false;
 
-    useEffect(() => {
-        // Caso precise rodar algo quando order mudar
-    }, [order]);
-
-    // Somente agora, após definir todos os Hooks, checamos se latestCenso é nulo
     if (!latestCenso) {
         return (
             <Box
@@ -96,11 +98,14 @@ const SchoolCensus: React.FC<SchoolCensusProps> = ({ escola }) => {
             </Box>
         );
     }
+    const selectedCenso: CensoEscolar | null = selectedYear ? censos.find(c => c.ano === selectedYear) || null : null;
 
-    const infra = latestCenso.infraestrutura;
+    if (!selectedCenso) return null;
+
+    const infra = selectedCenso.infraestrutura;
     const acessibilidade = infra.acessibilidade;
     const funcionarios = infra.funcionarios;
-    const educacao = latestCenso.educacao;
+    const educacao = selectedCenso.educacao;
 
     return (
         <Box
@@ -158,8 +163,8 @@ const SchoolCensus: React.FC<SchoolCensusProps> = ({ escola }) => {
                     }}
                 >
                     <Select
-                        value={order}
-                        onChange={(e) => setOrder(e.target.value as 'Decrescente' | 'Crescente')}
+                        value={selectedYear ?? ''}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
                         IconComponent={ArrowDropDownIcon}
                         sx={{
                             width: '181px',
@@ -203,50 +208,31 @@ const SchoolCensus: React.FC<SchoolCensusProps> = ({ escola }) => {
                             }
                         }}
                     >
-                        <MenuItem
-                            value="Decrescente"
-                            sx={{
-                                fontFamily: `'Rubik', sans-serif`,
-                                fontSize: '16px',
-                                color: '#373737',
-                                '&.Mui-selected': {
-                                    backgroundColor: '#F4DBCF !important',
-                                    color: 'inherit',
-                                },
-                                '&.Mui-selected:hover': {
-                                    backgroundColor: '#F4DBCF !important',
-                                    color: 'inherit',
-                                },
-                                '&:hover': {
-                                    backgroundColor: '#FBF2EE',
+                        {censos.map(c => (
+                            <MenuItem
+                                key={c.ano}
+                                value={c.ano}
+                                sx={{
+                                    fontFamily: `'Rubik', sans-serif`,
+                                    fontSize: '16px',
                                     color: '#373737',
-                                },
-                            }}
-                        >
-                            Decrescente
-                        </MenuItem>
-                        <MenuItem
-                            value="Crescente"
-                            sx={{
-                                fontFamily: `'Rubik', sans-serif`,
-                                fontSize: '16px',
-                                color: '#373737',
-                                '&.Mui-selected': {
-                                    backgroundColor: '#F4DBCF !important',
-                                    color: 'inherit',
-                                },
-                                '&.Mui-selected:hover': {
-                                    backgroundColor: '#F4DBCF !important',
-                                    color: 'inherit',
-                                },
-                                '&:hover': {
-                                    backgroundColor: '#FBF2EE',
-                                    color: '#373737',
-                                },
-                            }}
-                        >
-                            Crescente
-                        </MenuItem>
+                                    '&.Mui-selected': {
+                                        backgroundColor: '#F4DBCF !important',
+                                        color: 'inherit',
+                                    },
+                                    '&.Mui-selected:hover': {
+                                        backgroundColor: '#F4DBCF !important',
+                                        color: 'inherit',
+                                    },
+                                    '&:hover': {
+                                        backgroundColor: '#FBF2EE',
+                                        color: '#373737',
+                                    },
+                                }}
+                            >
+                                {c.ano}
+                            </MenuItem>
+                        ))}
                     </Select>
                     <Box
                         sx={{

@@ -115,7 +115,18 @@ const SchoolAccessibility: React.FC<SchoolAccessibilityProps> = ({ acessibilidad
                                         }}
                                     />
                                 ) : (
-                                    <></>
+                                    <Box 
+                                        sx={{
+                                            width: 15,
+                                            height: 15,
+                                            display: 'inline-flex',
+                                            backgroundImage: `url('/close_color.png')`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            backgroundRepeat: 'no-repeat',
+                                            margin: 'auto'
+                                        }}
+                                    />
                                 )}
                             </Box>
                         </Box>
