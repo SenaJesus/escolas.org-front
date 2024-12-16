@@ -164,6 +164,8 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                     setFailMessage('Você avaliou essa mesma escola nos últimos seis meses. Mas fique tranquilo, daqui a pouquinho você já vai poder avaliar novamente!');
                 } else if (errMessage.includes('Token inválido') || errMessage.includes('expirado')) {
                     setFailMessage('Seu token expirou. Por favor, confirme o email novamente para avaliar.');
+                    localStorage.removeItem('authorization');
+                    localStorage.removeItem('email');
                 } else {
                     setFailMessage(errMessage);
                 }
