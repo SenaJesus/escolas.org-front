@@ -7,11 +7,11 @@ interface ReviewCardProps {
     nomeUsuario: string;
 };
 
-const MAX_LENGTH = 180;
+const MAX_LENGTH = 130;
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, nomeUsuario }) => {
     const displayedText = texto.length > MAX_LENGTH ? `${texto.substring(0, MAX_LENGTH)}...` : texto;
-
+    
     return (
         <Box
             sx={{
@@ -108,10 +108,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, no
                 <Typography
                     sx={{
                         fontFamily: `'Rubik', sans-serif`,
-                        fontWeight: '400',
+                        fontWeight: 400,
                         color: '#373737',
                         fontSize: '16px',
-                        userSelect: 'none'
+                        userSelect: 'none',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        maxWidth: '100%'
                     }}
                     variant="body1"
                 >

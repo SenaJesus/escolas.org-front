@@ -141,7 +141,7 @@ const EmailConfirmation: React.FC<EmailConfirmationProps> = ({ email, setEmail, 
                             height: '100%',
                             boxSizing: 'border-box',
                             "::placeholder": {
-                            color: "#E3D1C8",
+                            color: "#AD7A62",
                             },
                             color: "#373737",
                         },

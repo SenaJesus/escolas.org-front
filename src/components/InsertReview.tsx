@@ -7,7 +7,7 @@ interface InsertReviewProps {
     comentario: string;
     setComentario: (c: string) => void;
     onClose: () => void;
-    onSubmit: () => Promise<void>; // Agora onSubmit é assíncrono, retorna Promise
+    onSubmit: () => Promise<void>; 
 }
 
 const InsertReview: React.FC<InsertReviewProps> = ({ nota, setNota, comentario, setComentario, onClose, onSubmit }) => {
@@ -185,7 +185,7 @@ const InsertReview: React.FC<InsertReviewProps> = ({ nota, setNota, comentario, 
                         height: '100%',
                         boxSizing: 'border-box',
                         "::placeholder": {
-                        color: "#E3D1C8",
+                        color: "#AD7A62",
                         },
                         color: "#373737",
                     },

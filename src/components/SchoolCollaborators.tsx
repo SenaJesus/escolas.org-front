@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { Funcionarios } from "../types/interfaces"; // Importe a interface corretamente
+import { Funcionarios } from "../types/interfaces"; 
 
 type FuncionarioKey =
     | "Administrativos"

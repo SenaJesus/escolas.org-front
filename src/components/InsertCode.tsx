@@ -5,8 +5,8 @@ interface InsertCodeProps {
     codigo: string;
     setCodigo: (c: string) => void;
     onClose: () => void;
-    onNext: () => Promise<void>; // agora onNext retorna uma Promise
-    onResend: () => Promise<void>; // idem, retorna Promise para podermos controlar o loading
+    onNext: () => Promise<void>; 
+    onResend: () => Promise<void>; 
 }
 
 const InsertCode: React.FC<InsertCodeProps> = ({ codigo, setCodigo, onClose, onNext, onResend }) => {
@@ -26,7 +26,7 @@ const InsertCode: React.FC<InsertCodeProps> = ({ codigo, setCodigo, onClose, onN
             try {
                 setIsLoading(true);
                 await onResend();
-                setSeconds(60); // reinicia o contador
+                setSeconds(60); 
             } finally {
                 setIsLoading(false);
             }
@@ -163,7 +163,7 @@ const InsertCode: React.FC<InsertCodeProps> = ({ codigo, setCodigo, onClose, onN
                             height: '100%',
                             boxSizing: 'border-box',
                             "::placeholder": {
-                            color: "#E3D1C8",
+                            color: "#AD7A62",
                             },
                             color: "#373737",
                         },
