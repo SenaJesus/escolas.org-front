@@ -13,7 +13,8 @@ const NavBar = () =>
                 padding: '0 120px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '43px'
+                gap: '43px',
+                flexShrink: 0
             }}
         >
             <Typography
