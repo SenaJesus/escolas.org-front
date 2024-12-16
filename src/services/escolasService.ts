@@ -52,7 +52,24 @@ export const getEscola = async (escolaId: number): Promise<Escola | null> => {
         const response = await api.get<Escola>(`escolas/${escolaId}`);
         return response.data;
     } catch (error: any) {
-        console.error('Erro ao buscar escolas com filtros:', error);
+        console.error('Erro ao buscar escola:', error);
         return null;
     }
+};
+
+export const solicitarAutorizacao = async (email: string): Promise<void> => {
+    await api.post('solicitar-autorizacao', { email });
+};
+
+export const confirmarAutorizacao = async (email: string, codigo: string): Promise<{ token: string }> => {
+    const response = await api.post('confirmar-autorizacao', { email, codigo });
+    return response.data;
+};
+
+export const submeterAvaliacao = async (escolaId: number, email: string, nota: number, comentario: string, token: string): Promise<void> => {
+    await api.post(`submeter-avaliacao/${escolaId}`, { email, nota, comentario }, {
+        headers: {
+            'Authorization': token
+        }
+    });
 };

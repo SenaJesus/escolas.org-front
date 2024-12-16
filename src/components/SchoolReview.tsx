@@ -3,13 +3,29 @@ import { Box, Typography, Select, MenuItem } from "@mui/material";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ReviewCard from "./ReviewCard";
 import { Escola } from "../types/interfaces";
+import EmailConfirmation from "./EmailConfirmation";
+import InsertCode from "./InsertCode";
+import DoneConfirmation from "./DoneConfirmation";
+import FailCode from "./FailCode";
+import InsertReview from "./InsertReview";
+import DoneReview from "./DoneReview";
+import { solicitarAutorizacao, confirmarAutorizacao, submeterAvaliacao } from '../services/escolasService';
+
+interface Review {
+    nota: number;
+    texto: string;
+    dataPublicacao: string;
+    nomeUsuario: string;
+}
+
+type OrderType = 'Decrescente' | 'Crescente';
 
 interface SchoolReviewProps {
     escola: Escola;
-};
+}
 
 const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
-    const [order, setOrder] = useState<'Decrescente' | 'Crescente'>('Decrescente');
+    const [order, setOrder] = useState<OrderType>('Decrescente');
 
     const avaliacaoPadrao = {
         nota: 0,
@@ -18,7 +34,7 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
         nomeUsuario: "escolas.org"
     };
 
-    const [reviews, setReviews] = useState(() => {
+    const [reviews, setReviews] = useState<Review[]>(() => {
         const avaliacoes = escola.avaliacoes;
         if (!avaliacoes || avaliacoes.length === 0) {
             return [avaliacaoPadrao];
@@ -37,32 +53,17 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
     const startX = useRef(0);
     const scrollLeft = useRef(0);
 
-    const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-        if (scrollContainerRef.current) {
-            e.preventDefault();
-            e.stopPropagation();
-            scrollContainerRef.current.scrollLeft += e.deltaY;
-        }
-    };
+    // Estados do fluxo de avaliação
+    const [showModal, setShowModal] = useState(false);
+    const [currentModal, setCurrentModal] = useState<
+        'emailConfirmation' | 'insertCode' | 'doneConfirmation' | 'failCode' | 'insertReview' | 'doneReview' | ''
+    >('');
 
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (scrollContainerRef.current) {
-            isDragging.current = true;
-            startX.current = e.pageX - scrollContainerRef.current.offsetLeft;
-            scrollLeft.current = scrollContainerRef.current.scrollLeft;
-        }
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!isDragging.current || !scrollContainerRef.current) return;
-        e.preventDefault();
-        const x = e.pageX - scrollContainerRef.current.offsetLeft;
-        const walk = (x - startX.current);
-        scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
-    };
-
-    const handleMouseUp = () => isDragging.current = false;
-    const handleMouseLeave = () => isDragging.current = false;
+    const [email, setEmail] = useState('');
+    const [codigo, setCodigo] = useState('');
+    const [nota, setNota] = useState(0);
+    const [comentario, setComentario] = useState('');
+    const [failMessage, setFailMessage] = useState('');
 
     useEffect(() => {
         const sortedReviews = [...reviews].sort((a, b) => {
@@ -80,6 +81,101 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
         return text.length > MAX_CHARS ? text.slice(0, MAX_CHARS) + '...' : text;
     };
 
+    const fecharModal = () => {
+        setShowModal(false);
+        setCurrentModal('');
+        setEmail('');
+        setCodigo('');
+        setNota(0);
+        setComentario('');
+        setFailMessage('');
+    };
+
+    // Iniciar fluxo ao clicar em "Fazer avaliação"
+    const iniciarFluxoAvaliacao = () => {
+        const token = localStorage.getItem('authorization');
+        const savedEmail = localStorage.getItem('email');
+
+        if (token) {
+            // Se temos token mas não temos email salvo, precisamos pedir o email
+            if (!savedEmail) {
+                setShowModal(true);
+                setCurrentModal('emailConfirmation');
+            } else {
+                // Temos token e email salvos
+                setEmail(savedEmail);
+                setShowModal(true);
+                setCurrentModal('insertReview');
+            }
+        } else {
+            // Não temos token, pede email
+            setShowModal(true);
+            setCurrentModal('emailConfirmation');
+        }
+    };
+
+    // Solicitar código
+    const solicitarCodigo = async () => {
+        await solicitarAutorizacao(email);
+        setCurrentModal('insertCode');
+    };
+
+    // Confirmar código
+    const confirmarCodigoFunc = async () => {
+        const res = await confirmarAutorizacao(email, codigo);
+        if (res && res.token) {
+            localStorage.setItem('authorization', `Bearer ${res.token}`);
+            localStorage.setItem('email', email);
+            setCurrentModal('doneConfirmation');
+        }
+    };
+
+    // Reenviar código
+    const reenviarCodigo = async () => {
+        await solicitarAutorizacao(email);
+        // Timer e overlay já estão no InsertCode
+    };
+
+    const irParaAvaliacao = () => {
+        // Temos email e token salvos
+        setCurrentModal('insertReview');
+    };
+
+    // Enviar avaliação
+    const enviarAvaliacao = async () => {
+        const token = localStorage.getItem('authorization');
+        const savedEmail = localStorage.getItem('email');
+        if (!token || !savedEmail) {
+            setFailMessage('Token ou email não encontrados. Por favor, confirme o email novamente.');
+            setCurrentModal('failCode');
+            return;
+        }
+
+        try {
+            await submeterAvaliacao(escola.id, savedEmail, nota, comentario, token);
+            setCurrentModal('doneReview');
+        } catch (error: any) {
+            if (error.response && error.response.data && error.response.data.error) {
+                const errMessage = error.response.data.error;
+                if (errMessage.includes('6 meses')) {
+                    setFailMessage('Você avaliou essa mesma escola nos últimos seis meses. Mas fique tranquilo, daqui a pouquinho você já vai poder avaliar novamente!');
+                } else if (errMessage.includes('Token inválido') || errMessage.includes('expirado')) {
+                    setFailMessage('Seu token expirou. Por favor, confirme o email novamente para avaliar.');
+                } else {
+                    setFailMessage(errMessage);
+                }
+            } else {
+                setFailMessage('Ocorreu um erro inesperado.');
+            }
+            setCurrentModal('failCode');
+        }
+    };
+
+    const fecharDoneReview = () => {
+        fecharModal();
+        window.location.reload();
+    };
+
     return (
         <Box
             sx={{
@@ -92,6 +188,75 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                 overflow: 'hidden' 
             }}
         >
+            {showModal && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: 'rgba(104,104,104,0.25)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 9999
+                    }}
+                >
+                    {currentModal === 'emailConfirmation' && (
+                        <EmailConfirmation
+                            email={email}
+                            setEmail={setEmail}
+                            onClose={fecharModal}
+                            onNext={solicitarCodigo}
+                        />
+                    )}
+
+                    {currentModal === 'insertCode' && (
+                        <InsertCode
+                            codigo={codigo}
+                            setCodigo={setCodigo}
+                            onClose={fecharModal}
+                            onNext={confirmarCodigoFunc}
+                            onResend={reenviarCodigo}
+                        />
+                    )}
+
+                    {currentModal === 'doneConfirmation' && (
+                        <DoneConfirmation
+                            onClose={fecharModal}
+                            onNext={irParaAvaliacao}
+                        />
+                    )}
+
+                    {currentModal === 'failCode' && (
+                        <FailCode
+                            message={failMessage}
+                            onClose={fecharModal}
+                        />
+                    )}
+
+                    {currentModal === 'insertReview' && (
+                        <InsertReview
+                            nota={nota}
+                            setNota={setNota}
+                            comentario={comentario}
+                            setComentario={setComentario}
+                            onClose={fecharModal}
+                            onSubmit={async () => {
+                                await enviarAvaliacao();
+                            }}
+                        />
+                    )}
+
+                    {currentModal === 'doneReview' && (
+                        <DoneReview
+                            onClose={fecharDoneReview}
+                        />
+                    )}
+                </Box>
+            )}
+
             <Box
                 sx={{
                     display: 'flex',
@@ -160,6 +325,7 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                             alignItems: 'center',
                             cursor: 'pointer'
                         }}
+                        onClick={iniciarFluxoAvaliacao}
                     >
                         <Typography
                             sx={{
@@ -195,7 +361,7 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                     </Box>
                     <Select
                         value={order}
-                        onChange={(e) => setOrder(e.target.value as 'Decrescente' | 'Crescente')}
+                        onChange={(e) => setOrder(e.target.value as OrderType)}
                         IconComponent={ArrowDropDownIcon}
                         sx={{
                             width: '181px',
@@ -287,11 +453,29 @@ const SchoolReview: React.FC<SchoolReviewProps> = ({ escola }) => {
                 </Box>
                 <Box
                     ref={scrollContainerRef}
-                    onWheel={handleWheel}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseLeave}
+                    onWheel={(e) => {
+                        if (scrollContainerRef.current) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            scrollContainerRef.current.scrollLeft += e.deltaY;
+                        }
+                    }}
+                    onMouseDown={(e) => {
+                        if (scrollContainerRef.current) {
+                            isDragging.current = true;
+                            startX.current = e.pageX - scrollContainerRef.current.offsetLeft;
+                            scrollLeft.current = scrollContainerRef.current.scrollLeft;
+                        }
+                    }}
+                    onMouseMove={(e) => {
+                        if (!isDragging.current || !scrollContainerRef.current) return;
+                        e.preventDefault();
+                        const x = e.pageX - scrollContainerRef.current.offsetLeft;
+                        const walk = (x - startX.current);
+                        scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+                    }}
+                    onMouseUp={() => isDragging.current = false}
+                    onMouseLeave={() => isDragging.current = false}
                     sx={{
                         display: 'flex',
                         gap: '15px',

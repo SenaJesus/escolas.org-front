@@ -1,8 +1,11 @@
 import { Box, Typography } from "@mui/material";
 
-const FailCode = () => {
-    const textoAlternativo = 'Você avaliou essa mesma escola nos últimos seis meses. Mas fique tranquilo, daqui a pouquinho você já vai poder avaliar novamente!'
+interface FailCodeProps {
+    message: string;
+    onClose: () => void;
+}
 
+const FailCode: React.FC<FailCodeProps> = ({ message, onClose }) => {
     return (
         <Box
             sx={{
@@ -36,6 +39,7 @@ const FailCode = () => {
                         marginLeft: 'auto',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 />
             </Box>
             <Box
@@ -74,7 +78,7 @@ const FailCode = () => {
                         }}
                         variant="h2"
                     >
-                        O código que você nos informou não é o mesmo que te enviamos. Vamos tentar novamente?
+                        {message}
                     </Typography>
                 </Box>
             </Box>
@@ -97,6 +101,7 @@ const FailCode = () => {
                         alignItems: 'center',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 >
                     <Typography
                         sx={{

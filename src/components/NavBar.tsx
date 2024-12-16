@@ -1,9 +1,11 @@
 import { Box, Typography } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from 'react-router-dom';
 
 const NavBar = () =>
 {
+    const navigate = useNavigate();
     return (
         <Box
             sx={{
@@ -28,6 +30,7 @@ const NavBar = () =>
                     cursor: 'pointer'
                 }}
                 variant="h1"
+                onClick={() => navigate('/')}
             >
                 ESCOLAS.ORG
             </Typography>
@@ -94,6 +97,7 @@ const NavBar = () =>
                         cursor: 'pointer'
                     }}
                     variant="h2"
+                    onClick={() => navigate('/')}
                 >
                     Início
                 </Typography>

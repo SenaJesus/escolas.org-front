@@ -1,6 +1,47 @@
-import { Box, Typography, TextField } from "@mui/material";
+import { Box, Typography, TextField, CircularProgress } from "@mui/material";
+import { useEffect, useState } from 'react';
 
-const InsertCode = () => {
+interface InsertCodeProps {
+    codigo: string;
+    setCodigo: (c: string) => void;
+    onClose: () => void;
+    onNext: () => Promise<void>; // agora onNext retorna uma Promise
+    onResend: () => Promise<void>; // idem, retorna Promise para podermos controlar o loading
+}
+
+const InsertCode: React.FC<InsertCodeProps> = ({ codigo, setCodigo, onClose, onNext, onResend }) => {
+    const [seconds, setSeconds] = useState(60);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleResend = async () => {
+        if (seconds === 0) {
+            try {
+                setIsLoading(true);
+                await onResend();
+                setSeconds(60); // reinicia o contador
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+    const handleNext = async () => {
+        try {
+            setIsLoading(true);
+            await onNext();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Box
             sx={{
@@ -12,9 +53,29 @@ const InsertCode = () => {
                 borderRadius: '10px',
                 padding: '15px',
                 flexDirection: 'column',
-                gap: '15px'
+                gap: '15px',
+                position: 'relative'
             }}
         >
+            {isLoading && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000,
+                        borderRadius: '10px',
+                    }}
+                >
+                    <CircularProgress sx={{ color: '#D57D54' }} />
+                </Box>
+            )}
             <Box
                 sx={{
                     display: 'flex',
@@ -34,6 +95,7 @@ const InsertCode = () => {
                         marginLeft: 'auto',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 />
             </Box>
             <Box
@@ -78,6 +140,8 @@ const InsertCode = () => {
                 <TextField
                     variant="outlined"
                     placeholder="Insira o código aqui"
+                    value={codigo}
+                    onChange={(e) => setCodigo(e.target.value)}
                     sx={{
                         width: '465px',
                         "& .MuiOutlinedInput-root": {
@@ -126,20 +190,21 @@ const InsertCode = () => {
                         borderStyle: 'solid',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        cursor: 'pointer'
+                        cursor: seconds === 0 && !isLoading ? 'pointer' : 'default'
                     }}
+                    onClick={handleResend}
                 >
                     <Typography
                         sx={{
                             fontFamily: `'Rubik', sans-serif`,
                             fontWeight: '400',
-                            color: '#FF7A3A',
+                            color: seconds === 0 ? '#FF7A3A' : '#AD7A62',
                             fontSize: '16px',
                             userSelect: 'none',
                         }}
                         variant="h1"
                     >
-                        Reenviar em 30s
+                        {seconds > 0 ? `Reenviar em ${seconds}s` : 'Reenviar'}
                     </Typography>
                 </Box>
                 <Box
@@ -154,6 +219,7 @@ const InsertCode = () => {
                         alignItems: 'center',
                         cursor: 'pointer'
                     }}
+                    onClick={handleNext}
                 >
                     <Typography
                         sx={{

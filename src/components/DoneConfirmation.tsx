@@ -1,6 +1,11 @@
 import { Box, Typography } from "@mui/material";
 
-const DoneConfirmation = () => {
+interface DoneConfirmationProps {
+    onClose: () => void;
+    onNext: () => void;
+}
+
+const DoneConfirmation: React.FC<DoneConfirmationProps> = ({ onClose, onNext }) => {
     return (
         <Box
             sx={{
@@ -34,6 +39,7 @@ const DoneConfirmation = () => {
                         marginLeft: 'auto',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 />
             </Box>
             <Box
@@ -95,6 +101,7 @@ const DoneConfirmation = () => {
                         alignItems: 'center',
                         cursor: 'pointer'
                     }}
+                    onClick={onNext}
                 >
                     <Typography
                         sx={{

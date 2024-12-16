@@ -1,6 +1,40 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, TextField, Typography, CircularProgress } from "@mui/material";
+import { useState } from 'react';
 
-const InsertReview = () => {
+interface InsertReviewProps {
+    nota: number;
+    setNota: (n: number) => void;
+    comentario: string;
+    setComentario: (c: string) => void;
+    onClose: () => void;
+    onSubmit: () => Promise<void>; // Agora onSubmit é assíncrono, retorna Promise
+}
+
+const InsertReview: React.FC<InsertReviewProps> = ({ nota, setNota, comentario, setComentario, onClose, onSubmit }) => {
+    const [hoverNota, setHoverNota] = useState<number>(0);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleClickNota = (value: number) => {
+        setNota(value);
+    };
+
+    const handleMouseEnter = (value: number) => {
+        setHoverNota(value);
+    };
+
+    const handleMouseLeave = () => {
+        setHoverNota(0);
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setIsLoading(true);
+            await onSubmit();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Box
             sx={{
@@ -12,9 +46,29 @@ const InsertReview = () => {
                 borderRadius: '10px',
                 padding: '15px',
                 flexDirection: 'column',
-                gap: '15px'
+                gap: '15px',
+                position: 'relative'
             }}
         >
+            {isLoading && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000,
+                        borderRadius: '10px',
+                    }}
+                >
+                    <CircularProgress sx={{ color: '#D57D54' }} />
+                </Box>
+            )}
             <Box
                 sx={{
                     display: 'flex',
@@ -34,6 +88,7 @@ const InsertReview = () => {
                         marginLeft: 'auto',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 />
             </Box>
             <Box
@@ -83,23 +138,32 @@ const InsertReview = () => {
                 }}
             >
                 {
-                    [...Array(5)].map(_ => (
-                        <Box
-                            sx={{
-                                height: '20px',
-                                width: '20px',
-                                borderRadius: '50%',
-                                bgcolor: '#FF7A3A',
-                                // bgcolor: currentPage % 4 === index ? '#FF7A3A' : '#D9D9D9',
-                                // cursor: currentPage % 4 === index ? 'default' : 'pointer'
-                            }}
-                        />
-                    ))
+                    [...Array(5)].map((_, index) => {
+                        const ratingValue = index + 1;
+                        const filled = ratingValue <= (hoverNota || nota);
+                        return (
+                            <Box
+                                key={index}
+                                sx={{
+                                    height: '20px',
+                                    width: '20px',
+                                    borderRadius: '50%',
+                                    bgcolor: filled ? '#FF7A3A' : '#D9D9D9',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => handleClickNota(ratingValue)}
+                                onMouseEnter={() => handleMouseEnter(ratingValue)}
+                                onMouseLeave={handleMouseLeave}
+                            />
+                        );
+                    })
                 }
             </Box>
             <TextField
                 variant="outlined"
                 placeholder="Insira seu comentário aqui"
+                value={comentario}
+                onChange={(e) => setComentario(e.target.value)}
                 sx={{
                     width: '465px',
                     "& .MuiOutlinedInput-root": {
@@ -145,8 +209,10 @@ const InsertReview = () => {
                         bgcolor: '#FF7A3A',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        cursor: 'pointer'
+                        cursor: isLoading ? 'default' : 'pointer',
+                        opacity: isLoading ? 0.7 : 1
                     }}
+                    onClick={isLoading ? undefined : handleSubmit}
                 >
                     <Typography
                         sx={{

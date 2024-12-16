@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 
 interface ReviewCardProps {
@@ -11,7 +10,7 @@ interface ReviewCardProps {
 const MAX_LENGTH = 180;
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ nota, texto, dataPublicacao, nomeUsuario }) => {
-    const displayedText = `${texto.substring(0, MAX_LENGTH)}...`;
+    const displayedText = texto.length > MAX_LENGTH ? `${texto.substring(0, MAX_LENGTH)}...` : texto;
 
     return (
         <Box

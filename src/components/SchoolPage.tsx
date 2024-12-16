@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import SchoolHeader from "./SchoolHeader";
 import SchoolReview from './SchoolReview';
 import SchoolCensus from './SchoolCensus';
@@ -33,7 +33,19 @@ const SchoolPage = () => {
         fetchEscola();
     }, [id, navigate]);
 
-    if (!escola) return <h1>Carregando</h1>
+    if (!escola) 
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                }}
+            >
+                <CircularProgress sx={{ color: '#D57D54' }} />
+            </Box>
+        );
 
     return (
         <Box

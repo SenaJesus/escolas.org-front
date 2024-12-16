@@ -1,6 +1,25 @@
-import { Box, Typography, TextField } from "@mui/material";
+import { Box, Typography, TextField, CircularProgress } from "@mui/material";
+import { useState } from 'react';
 
-const EmailConfirmation = () => {
+interface EmailConfirmationProps {
+    email: string;
+    setEmail: (email: string) => void;
+    onClose: () => void;
+    onNext: () => Promise<void>;
+}
+
+const EmailConfirmation: React.FC<EmailConfirmationProps> = ({ email, setEmail, onClose, onNext }) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleNext = async () => {
+        try {
+            setIsLoading(true);
+            await onNext();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Box
             sx={{
@@ -12,9 +31,29 @@ const EmailConfirmation = () => {
                 borderRadius: '10px',
                 padding: '15px',
                 flexDirection: 'column',
-                gap: '15px'
+                gap: '15px',
+                position: 'relative'
             }}
         >
+            {isLoading && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000,
+                        borderRadius: '10px',
+                    }}
+                >
+                    <CircularProgress sx={{ color: '#D57D54' }} />
+                </Box>
+            )}
             <Box
                 sx={{
                     display: 'flex',
@@ -34,6 +73,7 @@ const EmailConfirmation = () => {
                         marginLeft: 'auto',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 />
             </Box>
             <Box
@@ -78,6 +118,8 @@ const EmailConfirmation = () => {
                 <TextField
                     variant="outlined"
                     placeholder="Insira seu e-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     sx={{
                         width: '465px',
                         "& .MuiOutlinedInput-root": {
@@ -93,10 +135,10 @@ const EmailConfirmation = () => {
                             borderWidth: '1px',
                         },
                         color: "#373737",
-                        height: '35px', // Define a altura no root do input
+                        height: '35px',
                         "& .MuiOutlinedInput-input": {
-                            padding: '8px 12px', // Ajuste o padding conforme necessário
-                            height: '100%', // Garante que o input ocupe toda a altura do root
+                            padding: '8px 12px',
+                            height: '100%',
                             boxSizing: 'border-box',
                             "::placeholder": {
                             color: "#E3D1C8",
@@ -124,6 +166,7 @@ const EmailConfirmation = () => {
                         alignItems: 'center',
                         cursor: 'pointer'
                     }}
+                    onClick={handleNext}
                 >
                     <Typography
                         sx={{

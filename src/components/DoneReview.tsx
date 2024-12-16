@@ -1,6 +1,10 @@
 import { Box, Typography } from "@mui/material";
 
-const DoneReview = () => {
+interface DoneReviewProps {
+    onClose: () => void;
+}
+
+const DoneReview: React.FC<DoneReviewProps> = ({ onClose }) => {
     return (
         <Box
             sx={{
@@ -34,6 +38,7 @@ const DoneReview = () => {
                         marginLeft: 'auto',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 />
             </Box>
             <Box
@@ -72,7 +77,7 @@ const DoneReview = () => {
                         }}
                         variant="h2"
                     >
-                        Sua avaliação foi adicionada com sucesso, obrigado por ajudar outras famílias escolherem melhor suas escolas!
+                        Sua avaliação foi adicionada com sucesso, obrigado por ajudar outras famílias a escolherem melhor suas escolas!
                     </Typography>
                 </Box>
             </Box>
@@ -95,6 +100,7 @@ const DoneReview = () => {
                         alignItems: 'center',
                         cursor: 'pointer'
                     }}
+                    onClick={onClose}
                 >
                     <Typography
                         sx={{
